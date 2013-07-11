@@ -25,6 +25,8 @@ $plugin_url = WP_CONTENT_URL . '/plugins/' . plugin_basename(dirname(__FILE__)) 
 define('TSPFP_URL_PATH', $plugin_url);
 
 define('TSPFP_TEMPLATE_PATH', TSPFP_ABS_PATH . '/templates');
+define('TSPFP_TEMPLATE_CACHE_PATH', TSPFP_TEMPLATE_PATH . DIRECTORY_SEPARATOR . '/cache');
+define('TSPFP_TEMPLATE_COMPILE_PATH', TSPFP_TEMPLATE_PATH . DIRECTORY_SEPARATOR . '/compiled');
 
 // Set the file path
 $file_path    = $plugin_abs_path . DIRECTORY_SEPARATOR . basename(__FILE__);
@@ -45,6 +47,31 @@ if (!class_exists('Smarty'))
         require_once TSPFP_ABS_PATH . '/libs/Smarty.class.php';
 }
 
+register_activation_hook($file_path, 'fn_tspfp_install');
+register_uninstall_hook($file_path, 'fn_tspfp_uninstall');
+//--------------------------------------------------------
+// install plugin
+//--------------------------------------------------------
+function fn_tspfp_install()
+{
+    $status = @chmod(TSPFP_TEMPLATE_PATH, 0777);
+    //if (!$status)
+    //	wp_die('<pre>Could not set proper permissions for ' . TSPFP_TEMPLATE_PATH .'. Please change permissions to 0777 manually.</pre>');
+
+    $status = @chmod(TSPFP_TEMPLATE_CACHE_PATH, 0777);
+    //if (!$status)
+    //	wp_die('<pre>Could not set proper permissions for ' . TSPFP_TEMPLATE_CACHE_PATH .'. Please change permissions to 0777 manually.</pre>');
+
+    $status = @chmod(TSPFP_TEMPLATE_COMPILE_PATH, 0777);
+    //if (!$status)
+    //	wp_die('<pre>Could not set proper permissions for ' . TSPFP_TEMPLATE_COMPILE_PATH .'. Please change permissions to 0777 manually.</pre>');
+}
+//--------------------------------------------------------
+// uninstall plugin
+//--------------------------------------------------------
+function fn_tspfp_uninstall()
+{
+}
 //--------------------------------------------------------
 // Process shortcodes
 //--------------------------------------------------------
@@ -180,8 +207,8 @@ function fn_tspfp_display ($args = null, $echo = true)
 	    
 	$smarty = new Smarty;
 	$smarty->setTemplateDir(TSPFP_TEMPLATE_PATH);
-	$smarty->setCompileDir(TSPFP_TEMPLATE_PATH.'/compiled/');
-	$smarty->setCacheDir(TSPFP_TEMPLATE_PATH.'/cache/');
+	$smarty->setCompileDir(TSPFP_TEMPLATE_CACHE_PATH);
+	$smarty->setCacheDir(TSPFP_TEMPLATE_COMPILE_PATH);
 	
 	$return_HTML = "";
 	
