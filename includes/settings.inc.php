@@ -177,7 +177,7 @@ function fn_tspfp_settings_page() {
 		// array merge incase this version has added new options
 		$TSPFP_OPTIONS = array_merge( $TSPFP_OPTIONS , $tspfp_request_options );
 
-		update_option( 'tsp-featured-posts-options', $TSPFP_OPTIONS );
+		update_option( 'tspfp_options', $TSPFP_OPTIONS );
 		$message = __( "Options saved.", 'tsp-featured-posts' );
 	}
 
@@ -321,12 +321,12 @@ function fn_tspfp_register_settings() {
 	global $TSPFP_DEFAULTS,$TSPFP_OPTIONS;
 			
 	// install the option defaults
-	if( !get_option( 'tsp-featured-posts-options' ) ) 
+	if( !get_option( 'tspfp_options' ) ) 
 	{
-		add_option( 'tsp-featured-posts-options', $TSPFP_DEFAULTS, '', 'yes' );
+		add_option( 'tspfp_options', $TSPFP_DEFAULTS, '', 'yes' );
 	}
 
-	$TSPFP_OPTIONS = get_option( 'tsp-featured-posts-options' );// get options from the database
+	$TSPFP_OPTIONS = get_option( 'tspfp_options' );// get options from the database
 	
 	// array merge incase this version has added new options
 	
@@ -365,7 +365,7 @@ function fn_tspfp_plugin_init()
 }
 
 function fn_tspfp_delete_options() {
-	delete_option( 'tsp-featured-posts-options' );
+	delete_option( 'tspfp_options' );
 }
 
 function fn_tspfp_admin_head() 
@@ -410,7 +410,7 @@ add_filter( 'plugin_row_meta', 'fn_tspfp_register_plugin_links', 10, 2 );
 */
 
 // Add global setting for Captcha
-$TSPFP_OPTIONS = get_option( 'tsp-featured-posts-options' );// get the options from the database
+$TSPFP_OPTIONS = get_option( 'tspfp_options' );// get the options from the database
 
 add_action( 'init', 'fn_tspfp_plugin_init' );
 add_action( 'admin_init', 'fn_tspfp_plugin_init' );

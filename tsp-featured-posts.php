@@ -47,8 +47,8 @@ if (!class_exists('Smarty'))
         require_once TSPFP_ABS_PATH . '/libs/Smarty.class.php';
 }
 
-register_activation_hook($file_path, 'fn_tspfp_install');
-register_uninstall_hook($file_path, 'fn_tspfp_uninstall');
+register_activation_hook( __FILE__, 'fn_tspfp_install' );
+register_uninstall_hook( __FILE__, 'fn_tspfp_uninstall' );
 //--------------------------------------------------------
 // install plugin
 //--------------------------------------------------------
@@ -71,6 +71,7 @@ function fn_tspfp_install()
 //--------------------------------------------------------
 function fn_tspfp_uninstall()
 {
+	delete_option( 'tspfp_options' );
 }
 //--------------------------------------------------------
 // Process shortcodes
