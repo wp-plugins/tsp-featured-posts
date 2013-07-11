@@ -19,7 +19,7 @@ if (!defined('DIRECTORY_SEPARATOR')) {
 
 // Set the abs plugin path
 define('PLUGIN_ABS_PATH', ABSPATH . PLUGINDIR );
-$plugin_abs_path = PLUGIN_ABS_PATH . DIRECTORY_SEPARATOR . "tsp_featured_posts";
+$plugin_abs_path = PLUGIN_ABS_PATH . DIRECTORY_SEPARATOR . "tsp-featured-posts";
 define('TSPFP_ABS_PATH', $plugin_abs_path);
 $plugin_url = WP_CONTENT_URL . '/plugins/' . plugin_basename(dirname(__FILE__)) . '/';
 define('TSPFP_URL_PATH', $plugin_url);
@@ -35,7 +35,12 @@ define('TSPFP_ABSPATH', $asolute_path);
 
 include_once(TSPFP_ABS_PATH . '/includes/php-browser-detection.inc.php');
 include_once(TSPFP_ABS_PATH . '/includes/settings.inc.php');
-include_once(TSPFP_ABS_PATH . '/libs/Smarty.class.php');
+
+if (!class_exists('Smarty'))
+{
+    if (file_exists(TSPFP_ABS_PATH . '/libs/Smarty.class.php'))
+        require_once TSPFP_ABS_PATH . '/libs/Smarty.class.php';
+}
 
 //--------------------------------------------------------
 // Process shortcodes
@@ -45,7 +50,7 @@ function fn_tsp_featured_posts_process_shortcodes($att)
 	global $TSPFP_OPTIONS;
 	
 	if ( is_feed() )
-		return '[tsp_featured_posts]';
+		return '[tsp-featured-posts]';
 
 	$options = $TSPFP_OPTIONS;
 	
@@ -57,7 +62,7 @@ function fn_tsp_featured_posts_process_shortcodes($att)
 	return $output;
 }
 
-add_shortcode('tsp_featured_posts', 'fn_tsp_featured_posts_process_shortcodes');
+add_shortcode('tsp-featured-posts', 'fn_tsp_featured_posts_process_shortcodes');
 
 //--------------------------------------------------------
 // Get post thumbnail
@@ -117,20 +122,24 @@ function fn_tsp_featured_posts_adjust_video($video, $width, $height)
 //--------------------------------------------------------
 function fn_tsp_featured_posts_enqueue_styles()
 {
-    wp_enqueue_style('movingboxes.css', plugins_url('css/movingboxes.css', __FILE__ ));
+	wp_register_style( 'tspfp-movingboxes', plugins_url( 'css/movingboxes.css', __FILE__ ) );
+	wp_enqueue_style( 'tspfp-movingboxes' );
         
     if (is_lt_IE9())
     {
-    	wp_enqueue_style('movingboxes-ie.css', plugins_url('css/movingboxes-ie.css', __FILE__ ));
+		wp_register_style( 'tspfp-ie_movingboxes', plugins_url( 'css/movingboxes-ie.css', __FILE__ ) );
+		wp_enqueue_style( 'tspfp-ie_movingboxes' );
     }//endif
     	
     if (is_IE())
     {
-    	wp_enqueue_style('tsp_featured_posts.ie.css', plugins_url('tsp_featured_posts.ie.css', __FILE__ ));
+		wp_register_style( 'tspfp-ie_stylesheet', plugins_url( 'tsp-featured-posts.ie.css', __FILE__ ) );
+		wp_enqueue_style( 'tspfp-ie_stylesheet' );
     }//endif
     else
     {
-    	wp_enqueue_style('tsp_featured_posts.css', plugins_url('tsp_featured_posts.css', __FILE__ ));
+		wp_register_style( 'tspfp-stylesheet', plugins_url( 'tsp-featured-posts.css', __FILE__ ) );
+		wp_enqueue_style( 'tspfp-stylesheet' );
 	}//endelse
 }
 
@@ -331,14 +340,14 @@ function fn_tsp_featured_posts_display ($args = null, $echo = true)
 			$smarty->assign("comments_open", comments_open(), true);
 			$smarty->assign("post_password_required", post_password_required(), true);
 			$smarty->assign("long_title", get_the_title(), true);
-			$smarty->assign("wp_link_pages", wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'tsp_featured_posts' ), 'after' => '</div>', 'echo' => 0 ) ), true);
-			$smarty->assign("edit_post_link", get_edit_post_link( __( 'Edit', 'tsp_featured_posts' ), '<div class="edit-link">', '</div>', $ID ), true);
+			$smarty->assign("wp_link_pages", wp_link_pages( array( 'before' => '<div class="page-links">' . __( 'Pages:', 'tsp-featured-posts' ), 'after' => '</div>', 'echo' => 0 ) ), true);
+			$smarty->assign("edit_post_link", get_edit_post_link( __( 'Edit', 'tsp-featured-posts' ), '<div class="edit-link">', '</div>', $ID ), true);
 			$smarty->assign("author_first_name", get_the_author_meta('first_name'), true);
 			$smarty->assign("author_last_name", get_the_author_meta('last_name'), true);
 			$smarty->assign("sticky", is_sticky($ID), true);
 			$smarty->assign("permalink", get_permalink( $ID ), true);
 			
-			$smarty->assign("featured", __( 'Featured', 'tsp_featured_posts' ), true);
+			$smarty->assign("featured", __( 'Featured', 'tsp-featured-posts' ), true);
 			$smarty->assign("title", $title, true);
 			$smarty->assign("first_img", $first_img, true);
 			$smarty->assign("first_video", $first_video, true);
@@ -388,19 +397,19 @@ class TSP_Featured_Posts_Widget extends WP_Widget
     {
         // Get widget options
         $widget_options  = array(
-            'classname'                 => 'widget_tsp_featured_posts',
-            'description'               => __('This widget allows you to add in your sites themes a list of featured posts.', 'tsp_featured_posts')
+            'classname'                 => 'widget-tsp-featured-posts',
+            'description'               => __('This widget allows you to add in your sites themes a list of featured posts.', 'tsp-featured-posts')
         );
         
         // Get control options
         $control_options = array(
             'width' => 300,
             'height' => 350,
-            'id_base' => 'widget_tsp_featured_posts'
+            'id_base' => 'widget-tsp-featured-posts'
         );
         
         // Create the widget
-		parent::__construct('widget_tsp_featured_posts', __('TSP Featured Posts', 'tsp_featured_posts') , $widget_options, $control_options);
+		parent::__construct('widget-tsp-featured-posts', __('TSP Featured Posts', 'tsp-featured-posts') , $widget_options, $control_options);
     }
     
     //--------------------------------------------------------
@@ -471,7 +480,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('title'); ?>"><?php
-        _e('Title:', 'tsp_featured_posts') ?></label>
+        _e('Title:', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('title'); ?>" name="<?php
         echo $this->get_field_name('title'); ?>" value="<?php
@@ -482,16 +491,16 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('showquotes'); ?>"><?php
-        _e('Display quotes?', 'tsp_featured_posts') ?></label>
+        _e('Display quotes?', 'tsp-featured-posts') ?></label>
    <select name="<?php
         echo $this->get_field_name('showquotes'); ?>" id="<?php
         echo $this->get_field_id('showquotes'); ?>" >
       <option class="level-0" value="Y" <?php
         if ($instance['showquotes'] == "Y") echo " selected='selected'" ?>><?php
-        _e('Yes', 'tsp_featured_posts') ?></option>
+        _e('Yes', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="N" <?php
         if ($instance['showquotes'] == "N") echo " selected='selected'" ?>><?php
-        _e('No', 'tsp_featured_posts') ?></option>
+        _e('No', 'tsp-featured-posts') ?></option>
    </select>
 </p>
 
@@ -499,16 +508,16 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('showtextposts'); ?>"><?php
-        _e('Show Posts With No Media Content?', 'tsp_featured_posts') ?></label>
+        _e('Show Posts With No Media Content?', 'tsp-featured-posts') ?></label>
    <select name="<?php
         echo $this->get_field_name('showtextposts'); ?>" id="<?php
         echo $this->get_field_id('showtextposts'); ?>" >
       <option class="level-0" value="Y" <?php
         if ($instance['showtextposts'] == "Y") echo " selected='selected'" ?>><?php
-        _e('Yes', 'tsp_featured_posts') ?></option>
+        _e('Yes', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="N" <?php
         if ($instance['showtextposts'] == "N") echo " selected='selected'" ?>><?php
-        _e('No', 'tsp_featured_posts') ?></option>
+        _e('No', 'tsp-featured-posts') ?></option>
    </select>
 </p>
 
@@ -516,7 +525,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('numberposts'); ?>"><?php
-        _e('How many posts do you want to display?', 'tsp_featured_posts') ?></label>
+        _e('How many posts do you want to display?', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('numberposts'); ?>" name="<?php
         echo $this->get_field_name('numberposts'); ?>" value="<?php
@@ -527,7 +536,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('postids'); ?>"><?php
-        _e('Post IDs to display (seperate by comma)', 'tsp_featured_posts') ?></label>
+        _e('Post IDs to display (seperate by comma)', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('postids'); ?>" name="<?php
         echo $this->get_field_name('postids'); ?>" value="<?php
@@ -538,7 +547,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('category'); ?>"><?php
-        _e('Enter the category ID to query from. Enter 0 to query all categories.', 'tsp_featured_posts') ?></label>
+        _e('Enter the category ID to query from. Enter 0 to query all categories.', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('category'); ?>" name="<?php
         echo $this->get_field_name('category'); ?>" value="<?php
@@ -549,7 +558,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('widthslider'); ?>"><?php
-        _e('Slider Width (Sliding Gallery Only)', 'tsp_featured_posts') ?></label>
+        _e('Slider Width (Sliding Gallery Only)', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('widthslider'); ?>" name="<?php
         echo $this->get_field_name('widthslider'); ?>" value="<?php
@@ -560,7 +569,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('heightslider'); ?>"><?php
-        _e('Slider Height (Sliding Gallery Only)', 'tsp_featured_posts') ?></label>
+        _e('Slider Height (Sliding Gallery Only)', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('heightslider'); ?>" name="<?php
         echo $this->get_field_name('heightslider'); ?>" value="<?php
@@ -571,25 +580,25 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('layout'); ?>"><?php
-        _e('Choose the post layout:', 'tsp_featured_posts') ?></label>
+        _e('Choose the post layout:', 'tsp-featured-posts') ?></label>
    <select name="<?php
         echo $this->get_field_name('layout'); ?>" id="<?php
         echo $this->get_field_id('layout'); ?>" >
       <option class="level-0" value="0" <?php
         if ($instance['layout'] == "0") echo " selected='selected'" ?>><?php
-        _e('Image (left), Title, Text (right)', 'tsp_featured_posts') ?></option>
+        _e('Image (left), Title, Text (right)', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="1" <?php
         if ($instance['layout'] == "1") echo " selected='selected'" ?>><?php
-        _e('Title (top), Image (below,left), Text (right)', 'tsp_featured_posts') ?></option>
+        _e('Title (top), Image (below,left), Text (right)', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="2" <?php
         if ($instance['layout'] == "2") echo " selected='selected'" ?>><?php
-        _e('Title, Image (left) - Text (right)', 'tsp_featured_posts') ?></option>
+        _e('Title, Image (left) - Text (right)', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="3" <?php
         if ($instance['layout'] == "3") echo " selected='selected'" ?>><?php
-        _e('Image (left) - Text (right)', 'tsp_featured_posts') ?></option>
+        _e('Image (left) - Text (right)', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="4" <?php
         if ($instance['layout'] == "4") echo " selected='selected'" ?>><?php
-		_e('Slider', 'tsp_featured_posts') ?></option>
+		_e('Slider', 'tsp-featured-posts') ?></option>
    </select>
 </p>
 
@@ -597,28 +606,28 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('orderby'); ?>"><?php
-        _e('Choose type of order:', 'tsp_featured_posts') ?></label>
+        _e('Choose type of order:', 'tsp-featured-posts') ?></label>
    <select name="<?php
         echo $this->get_field_name('orderby'); ?>" id="<?php
         echo $this->get_field_id('orderby'); ?>" >
       <option class="level-0" value="rand" <?php
         if ($instance['orderby'] == "rand") echo " selected='selected'" ?>><?php
-        _e('Random', 'tsp_featured_posts') ?></option>
+        _e('Random', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="title" <?php
         if ($instance['orderby'] == "title") echo " selected='selected'" ?>><?php
-        _e('Title', 'tsp_featured_posts') ?></option>
+        _e('Title', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="date" <?php
         if ($instance['orderby'] == "date") echo " selected='selected'" ?>><?php
-        _e('Date', 'tsp_featured_posts') ?></option>
+        _e('Date', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="author" <?php
         if ($instance['orderby'] == "author") echo " selected='selected'" ?>><?php
-        _e('Author', 'tsp_featured_posts') ?></option>
+        _e('Author', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="modified" <?php
         if ($instance['orderby'] == "modified") echo " selected='selected'" ?>><?php
-        _e('Modified', 'tsp_featured_posts') ?></option>
+        _e('Modified', 'tsp-featured-posts') ?></option>
       <option class="level-0" value="ID" <?php
         if ($instance['orderby'] == "ID") echo " selected='selected'" ?>><?php
-        _e('ID', 'tsp_featured_posts') ?></option>
+        _e('ID', 'tsp-featured-posts') ?></option>
    </select>
 </p>
 
@@ -626,7 +635,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('widththumb'); ?>"><?php
-        _e('Thumbnail Width', 'tsp_featured_posts') ?></label>
+        _e('Thumbnail Width', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('widththumb'); ?>" name="<?php
         echo $this->get_field_name('widththumb'); ?>" value="<?php
@@ -637,7 +646,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('heightthumb'); ?>"><?php
-        _e('Thumbnail Height', 'tsp_featured_posts') ?></label>
+        _e('Thumbnail Height', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('heightthumb'); ?>" name="<?php
         echo $this->get_field_name('heightthumb'); ?>" value="<?php
@@ -648,7 +657,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('beforetitle'); ?>"><?php
-        _e('HTML Before Title', 'tsp_featured_posts') ?></label>
+        _e('HTML Before Title', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('beforetitle'); ?>" name="<?php
         echo $this->get_field_name('beforetitle'); ?>" value="<?php
@@ -659,7 +668,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 <p>
    <label for="<?php
         echo $this->get_field_id('aftertitle'); ?>"><?php
-        _e('HTML After Title', 'tsp_featured_posts') ?></label>
+        _e('HTML After Title', 'tsp-featured-posts') ?></label>
    <input id="<?php
         echo $this->get_field_id('aftertitle'); ?>" name="<?php
         echo $this->get_field_name('aftertitle'); ?>" value="<?php
@@ -715,7 +724,7 @@ function fn_tsp_featured_posts_box()
 //--------------------------------------------------------
 function fn_tsp_featured_posts_add_box()
 {
-    add_meta_box('post_info', __('TSP Featured Post Information', 'tsp_featured_posts') , 'fn_tsp_featured_posts_box', 'post', 'side', 'high');
+    add_meta_box('post_info', __('TSP Featured Post Information', 'tsp-featured-posts') , 'fn_tsp_featured_posts_box', 'post', 'side', 'high');
 }
 
 add_action('admin_menu', 'fn_tsp_featured_posts_add_box');
