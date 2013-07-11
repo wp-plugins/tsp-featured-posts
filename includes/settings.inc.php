@@ -355,7 +355,7 @@ function fn_tspfp_plugin_init()
 	
 	if (version_compare($wp_version, "3.5.1", "<"))
 	{
-		wp_die("<pre>TSP Featured Posts requires WordPress version <strong>3.5.1 or higher</<strong>.<br>You have version <strong>$wp_version</strong> installed.</pre>");
+		wp_die("<pre>TSP Featured Posts requires WordPress version <strong>" . TSPFP_REQUIRED_WP_VERSION ." or higher</<strong>.<br>You have version <strong>$wp_version</strong> installed.</pre>");
 	}//endif
 	
 	if( is_plugin_active('tsp_featured_posts/tsp_featured_posts.php') ) 
