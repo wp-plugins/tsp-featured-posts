@@ -32,8 +32,8 @@ define('TSPFP_URL_PATH', $plugin_url);
 $upload_dir = wp_upload_dir();
 
 define('TSPFP_TEMPLATE_PATH', TSPFP_ABS_PATH . '/templates');
-define('TSPFP_TEMPLATE_CACHE_PATH', $upload_dir['basedir'] . '/tsp/fp/cache');
-define('TSPFP_TEMPLATE_COMPILE_PATH', $upload_dir['basedir'] . '/tsp/fp/compiled');
+define('TSPFP_TEMPLATE_CACHE_PATH', $upload_dir['basedir'] . '/tsp-plugins/tsp-featured-posts/cache');
+define('TSPFP_TEMPLATE_COMPILE_PATH', $upload_dir['basedir'] . '/tsp-plugins/tsp-featured-posts/compiled');
 
 // Set the file path
 $file_path    = $plugin_abs_path . DIRECTORY_SEPARATOR . basename(__FILE__);
