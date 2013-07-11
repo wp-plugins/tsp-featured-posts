@@ -159,7 +159,7 @@ if (! function_exists('fn_tsp_plugins_add_menu_render') ){
 }
 
 // Function for display captcha settings page in the admin area
-function fn_tsp_featured_posts_settings_page() {
+function fn_tspfp_settings_page() {
 	global $TSPFP_ADMIN_FIELDS;
 	global $TSPFP_OPTIONS;
 
@@ -316,7 +316,7 @@ function fn_tsp_featured_posts_settings_page() {
 <?php } 
 
 // register settings function
-function fn_tsp_featured_posts_register_settings() {
+function fn_tspfp_register_settings() {
 
 	global $TSPFP_DEFAULTS,$TSPFP_OPTIONS;
 			
@@ -340,24 +340,35 @@ function fn_tsp_featured_posts_register_settings() {
 	}//endelse
 }
 
-function fn_tsp_featured_posts_add_admin_menu() 
+function fn_tspfp_add_admin_menu() 
 {
 	add_menu_page( 'TSP Plugins', 'TSP Plugins', 'manage_options', 'tsp_plugins', 'fn_tsp_plugins_add_menu_render', WP_CONTENT_URL."/plugins/tsp-featured-posts/images/tsp_icon_16.png", 2617638); 
-	add_submenu_page('tsp_plugins', __( 'Featured Posts', 'tsp-featured-posts' ), __( 'Featured Posts', 'tsp-featured-posts' ), 'manage_options', "tsp-featured-posts.php", 'fn_tsp_featured_posts_settings_page');
+	add_submenu_page('tsp_plugins', __( 'Featured Posts', 'tsp-featured-posts' ), __( 'Featured Posts', 'tsp-featured-posts' ), 'manage_options', "tsp-featured-posts.php", 'fn_tspfp_settings_page');
 
 	//call register settings function
-	add_action( 'admin_init', 'fn_tsp_featured_posts_register_settings' );
+	add_action( 'admin_init', 'fn_tspfp_register_settings' );
 }
 
-function fn_tsp_featured_posts_plugin_init() 
+function fn_tspfp_plugin_init() 
 {
+	global $wp_version;
+	
+	if (version_compare($wp_version, "3.5.1", "<"))
+	{
+		wp_die("<pre>TSP Featured Posts requires WordPress version <strong>3.5.1 or higher</<strong>.<br>You have version <strong>$wp_version</strong> installed.</pre>");
+	}//endif
+	
+	if( is_plugin_active('tsp_featured_posts/tsp_featured_posts.php') ) 
+	{
+		deactivate_plugins( 'tsp_featured_posts/tsp_featured_posts.php' );
+	}//endif
 }
 
-function fn_tsp_featured_posts_delete_options() {
+function fn_tspfp_delete_options() {
 	delete_option( 'tsp-featured-posts-options' );
 }
 
-function fn_tsp_featured_posts_admin_head() 
+function fn_tspfp_admin_head() 
 {
 	wp_register_script( 'tspp-skel.min.js', plugins_url( 'js/skel.min.js', __FILE__ ) );
 	wp_enqueue_script( 'tspp-skel.min.js' );
@@ -366,17 +377,47 @@ function fn_tsp_featured_posts_admin_head()
 	wp_enqueue_style( 'tspfp-admin_stylesheet' );
 }
 
+/*
+function fn_tspfp_plugin_action_links( $links, $file ) 
+{
+	//Static so we don't call plugin_basename on every plugin row.
+	static $this_plugin;
+	if ( ! $this_plugin ) $this_plugin = plugin_basename(__FILE__);
 
+	if ( $file == $this_plugin ){
+			 $settings_link = '<a href="admin.php?page=tsp-featured-posts.php">' . __( 'Settings', 'tsp-featured-posts' ) . '</a>';
+			 array_unshift( $links, $settings_link );
+	}
+	return $links;
+} // end function fn_tspfp_plugin_action_links
+
+// adds "Settings" link to the plugin action page
+add_filter( 'plugin_action_links', 'fn_tspfp_plugin_action_links', 10, 2 );
+
+function fn_tspfp_register_plugin_links($links, $file) 
+{
+	$base = plugin_basename(__FILE__);
+	if ($file == $base) {
+		$links[] = '<a href="admin.php?page=tsp-featured-posts.php">' . __( 'Settings', 'tsp-featured-posts' ) . '</a>';
+		$links[] = '<a href="http://wordpress.org/extend/plugins/tsp-featured-posts/faq/" target="_blank">' . __( 'FAQ', 'tsp-featured-posts' ) . '</a>';
+		$links[] = '<a href="http://lab.thesoftwarepeople.com/tracker/wordpress-fp" target="_blank">' . __( 'Support', 'tsp-featured-posts' ) . '</a>';
+	}
+	return $links;
+} // end function fn_tspfp_register_plugin_links
+
+//Additional links on the plugin page
+add_filter( 'plugin_row_meta', 'fn_tspfp_register_plugin_links', 10, 2 );
+*/
 
 // Add global setting for Captcha
 $TSPFP_OPTIONS = get_option( 'tsp-featured-posts-options' );// get the options from the database
 
-add_action( 'init', 'fn_tsp_featured_posts_plugin_init' );
-add_action( 'admin_init', 'fn_tsp_featured_posts_plugin_init' );
-add_action( 'admin_menu', 'fn_tsp_featured_posts_add_admin_menu' );
-add_action( 'admin_enqueue_scripts', 'fn_tsp_featured_posts_admin_head' );
+add_action( 'init', 'fn_tspfp_plugin_init' );
+add_action( 'admin_init', 'fn_tspfp_plugin_init' );
+add_action( 'admin_menu', 'fn_tspfp_add_admin_menu' );
+add_action( 'admin_enqueue_scripts', 'fn_tspfp_admin_head' );
 
-register_uninstall_hook( __FILE__, 'fn_tsp_featured_posts_delete_options' );
+register_uninstall_hook( __FILE__, 'fn_tspfp_delete_options' );
 
 
 ?>

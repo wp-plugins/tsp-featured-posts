@@ -33,8 +33,11 @@ $file_path    = $plugin_abs_path . DIRECTORY_SEPARATOR . basename(__FILE__);
 $asolute_path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 define('TSPFP_ABSPATH', $asolute_path);
 
+
+include_once(ABSPATH . 'wp-admin/includes/plugin.php' );
 include_once(TSPFP_ABS_PATH . '/includes/php-browser-detection.inc.php');
 include_once(TSPFP_ABS_PATH . '/includes/settings.inc.php');
+
 
 if (!class_exists('Smarty'))
 {
@@ -45,7 +48,7 @@ if (!class_exists('Smarty'))
 //--------------------------------------------------------
 // Process shortcodes
 //--------------------------------------------------------
-function fn_tsp_featured_posts_process_shortcodes($att)
+function fn_tspfp_process_shortcodes($att)
 {
 	global $TSPFP_OPTIONS;
 	
@@ -57,17 +60,18 @@ function fn_tsp_featured_posts_process_shortcodes($att)
 	if (!empty($att))
 		$options = array_merge( $TSPFP_OPTIONS, $att );
 		     	
-	$output = fn_tsp_featured_posts_display($options,false);
+	$output = fn_tspfp_display($options,false);
 	
 	return $output;
 }
 
-add_shortcode('tsp-featured-posts', 'fn_tsp_featured_posts_process_shortcodes');
+add_shortcode('tsp-featured-posts', 'fn_tspfp_process_shortcodes');
+add_shortcode('tsp_featured_posts', 'fn_tspfp_process_shortcodes'); //previous shortcodes
 
 //--------------------------------------------------------
 // Get post thumbnail
 //--------------------------------------------------------
-function fn_tsp_featured_posts_get_thumbnail($post)
+function fn_tspfp_get_thumbnail($post)
 {
     $img = '';
     ob_start();
@@ -80,7 +84,7 @@ function fn_tsp_featured_posts_get_thumbnail($post)
 //--------------------------------------------------------
 // Get post video
 //--------------------------------------------------------
-function fn_tsp_featured_posts_get_video($post)
+function fn_tspfp_get_video($post)
 {
     $video = '';
     ob_start();
@@ -107,7 +111,7 @@ function fn_tsp_featured_posts_get_video($post)
 //--------------------------------------------------------
 // Adjust the size of a video
 //--------------------------------------------------------
-function fn_tsp_featured_posts_adjust_video($video, $width, $height)
+function fn_tspfp_adjust_video($video, $width, $height)
 {
 	$video = preg_replace('/width="(.*?)"/i', 'width="'.$width.'"', $video);
 	$video = preg_replace('/height="(.*?)"/i', 'height="'.$height.'"', $video);
@@ -120,7 +124,7 @@ function fn_tsp_featured_posts_adjust_video($video, $width, $height)
 //--------------------------------------------------------
 // Queue the stylesheet
 //--------------------------------------------------------
-function fn_tsp_featured_posts_enqueue_styles()
+function fn_tspfp_enqueue_styles()
 {
 	wp_register_style( 'tspfp-movingboxes', plugins_url( 'css/movingboxes.css', __FILE__ ) );
 	wp_enqueue_style( 'tspfp-movingboxes' );
@@ -143,12 +147,12 @@ function fn_tsp_featured_posts_enqueue_styles()
 	}//endelse
 }
 
-add_action('wp_print_styles', 'fn_tsp_featured_posts_enqueue_styles');
+add_action('wp_print_styles', 'fn_tspfp_enqueue_styles');
 
 //--------------------------------------------------------
 // Queue the scripts
 //--------------------------------------------------------
-function fn_tsp_featured_posts_enqueue_scripts()
+function fn_tspfp_enqueue_scripts()
 {
     wp_enqueue_script( 'jquery' ); // Queue in wordpress jquery
     
@@ -165,12 +169,12 @@ function fn_tsp_featured_posts_enqueue_scripts()
     wp_enqueue_script('tspfp-scripts.js');
 }
 
-add_action('wp_enqueue_scripts', 'fn_tsp_featured_posts_enqueue_scripts');
+add_action('wp_enqueue_scripts', 'fn_tspfp_enqueue_scripts');
 
 //--------------------------------------------------------
 // Show simple featured posts
 //--------------------------------------------------------
-function fn_tsp_featured_posts_display ($args = null, $echo = true)
+function fn_tspfp_display ($args = null, $echo = true)
 {
     global $TSPFP_OPTIONS;
 	    
@@ -226,15 +230,15 @@ function fn_tsp_featured_posts_display ($args = null, $echo = true)
         $full_preview = "";        
                         
         // get the first image
-        $first_img     = fn_tsp_featured_posts_get_thumbnail($post);
+        $first_img     = fn_tspfp_get_thumbnail($post);
         $first_video = null;
         
         if (empty($first_img))
         {
-        	$first_video = fn_tsp_featured_posts_get_video($post);
+        	$first_video = fn_tspfp_get_video($post);
         
 	       	if (!empty($first_video))
-	       		$first_video = fn_tsp_featured_posts_adjust_video($first_video,$widththumb,$heightthumb);
+	       		$first_video = fn_tspfp_adjust_video($first_video,$widththumb,$heightthumb);
 	    }//endif
 
         // get the quote for the post
@@ -379,16 +383,16 @@ function fn_tsp_featured_posts_display ($args = null, $echo = true)
 //--------------------------------------------------------
 // Register widget
 //--------------------------------------------------------
-function fn_tsp_featured_posts_widget_init()
+function fn_tspfp_widget_init()
 {
-    register_widget('TSP_Featured_Posts_Widget');
+    register_widget('TSPFP_Widget');
 }
 
 // Add functions to init
-add_action('widgets_init', 'fn_tsp_featured_posts_widget_init');
+add_action('widgets_init', 'fn_tspfp_widget_init');
 //--------------------------------------------------------
 
-class TSP_Featured_Posts_Widget extends WP_Widget
+class TSPFP_Widget extends WP_Widget
 {
     //--------------------------------------------------------
     // Constructor
@@ -438,7 +442,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
                 
         // Display the widget
         echo $before_widget;
-        fn_tsp_featured_posts_display($arguments);
+        fn_tspfp_display($arguments);
         echo $after_widget;
     }
     
@@ -678,7 +682,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 </p>
    <?php
     }
-} //end class TSP_Featured_Posts_Widget
+} //end class TSPFP_Widget
 
 
 //---------------------------------------------------
@@ -688,7 +692,7 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 //--------------------------------------------------------
 // save the metadata
 //--------------------------------------------------------
-function fn_tsp_featured_posts_modify_data($post_ID)
+function fn_tspfp_modify_data($post_ID)
 {
     $article = get_post($post_ID);
     
@@ -700,14 +704,14 @@ function fn_tsp_featured_posts_modify_data($post_ID)
     }
 }
 
-add_action('new_to_publish', 'fn_tsp_featured_posts_modify_data');
-add_action('save_post', 'fn_tsp_featured_posts_modify_data');
+add_action('new_to_publish', 'fn_tspfp_modify_data');
+add_action('save_post', 'fn_tspfp_modify_data');
 //--------------------------------------------------------
 
 //--------------------------------------------------------
 // Funciton to display form fields to update/save meta data
 //--------------------------------------------------------
-function fn_tsp_featured_posts_box()
+function fn_tspfp_box()
 {
     global $post;
     $quote    = get_post_meta($post->ID, 'quote', 1);
@@ -724,11 +728,11 @@ function fn_tsp_featured_posts_box()
 //--------------------------------------------------------
 // Funciton to display form fields to update/save meta data
 //--------------------------------------------------------
-function fn_tsp_featured_posts_add_box()
+function fn_tspfp_add_box()
 {
-    add_meta_box('post_info', __('TSP Featured Post Information', 'tsp-featured-posts') , 'fn_tsp_featured_posts_box', 'post', 'side', 'high');
+    add_meta_box('post_info', __('TSP Featured Post Information', 'tsp-featured-posts') , 'fn_tspfp_box', 'post', 'side', 'high');
 }
 
-add_action('admin_menu', 'fn_tsp_featured_posts_add_box');
+add_action('admin_menu', 'fn_tspfp_add_box');
 //--------------------------------------------------------
 ?>
