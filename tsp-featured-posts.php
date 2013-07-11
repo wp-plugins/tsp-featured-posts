@@ -473,6 +473,8 @@ class TSP_Featured_Posts_Widget extends WP_Widget
 	//--------------------------------------------------------
     function form($instance)
     {
+        global $TSPFP_DEFAULTS;
+        
         // Set default values for widget
         $instance = wp_parse_args((array)$instance, $TSPFP_DEFAULTS); ?>
       
