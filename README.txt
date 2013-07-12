@@ -37,7 +37,8 @@ Add a `Featured Posts` to posts and pages by using a shortcode inside your text 
 
 = I've installed the plugin but my posts are not displaying? =
 
-Make sure the folder `/wp-content/plugins/tsp-featured-posts/templates/` has recursive, 777 permissions
+1. Make sure the folder `/wp-content/uploads/` has recursive, 777 permissions
+2. Make sure you are listing posts from all `categories` that exist and/or `postids` is empty or the posts it refers to exists
 
 == Screenshots ==
 
